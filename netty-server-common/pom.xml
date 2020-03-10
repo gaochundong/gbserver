@@ -8,9 +8,9 @@
         <artifactId>gbserver-parent</artifactId>
         <version>1795.0-SNAPSHOT</version>
     </parent>
-    <artifactId>netty-server-jt808</artifactId>
-    <name>netty-server-jt808</name>
-    <description>Netty/Server/JT808</description>
+    <artifactId>netty-server-common</artifactId>
+    <name>netty-server-common</name>
+    <description>Netty/Server/Common</description>
 
     <dependencies>
 
@@ -26,25 +26,7 @@
             <groupId>ai.sangmado.gbprotocol</groupId>
             <artifactId>gbcommon</artifactId>
         </dependency>
-
-        <!--jt808-->
-        <dependency>
-            <groupId>ai.sangmado.gbprotocol</groupId>
-            <artifactId>jt808</artifactId>
-        </dependency>
-
-        <!--netty-codec-jt808-->
-        <dependency>
-            <groupId>ai.sangmado.gbcodec</groupId>
-            <artifactId>netty-codec-jt808</artifactId>
-        </dependency>
-
-        <!--netty-server-common-->
-        <dependency>
-            <groupId>ai.sangmado.gbserver</groupId>
-            <artifactId>netty-server-common</artifactId>
-        </dependency>
-
+        
         <!--guava-->
         <dependency>
             <groupId>com.google.guava</groupId>

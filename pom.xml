@@ -11,6 +11,7 @@
     <description>A netty server to bootstrap a specific gbcodec.</description>
 
     <modules>
+        <module>netty-server-common</module>
         <module>netty-server-jt808</module>
         <module>netty-server-jt809</module>
     </modules>
@@ -92,6 +93,13 @@
                 <groupId>ai.sangmado.gbcodec</groupId>
                 <artifactId>netty-codec-jt809</artifactId>
                 <version>${gbcodec.version}</version>
+            </dependency>
+
+            <!--netty-server-common-->
+            <dependency>
+                <groupId>ai.sangmado.gbserver</groupId>
+                <artifactId>netty-server-common</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <!--netty-server-jt808-->
