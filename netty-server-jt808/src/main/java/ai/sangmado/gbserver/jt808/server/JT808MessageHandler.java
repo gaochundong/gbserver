@@ -8,7 +8,7 @@ import ai.sangmado.gbserver.common.protocol.RequestHandler;
  * @param <I> 业务请求
  * @param <O> 业务回复
  */
-public class JT808RequestHandler<I, O> implements RequestHandler<I, O> {
+public class JT808MessageHandler<I, O> implements RequestHandler<I, O> {
 
     @Override
     public void handle(I request, O response) {

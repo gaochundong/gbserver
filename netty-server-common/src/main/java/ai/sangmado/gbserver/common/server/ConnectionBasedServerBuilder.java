@@ -30,8 +30,6 @@ public abstract class ConnectionBasedServerBuilder<I, O, B extends ConnectionBas
 
     @Override
     public B defaultChannelOptions() {
-        channelOption(ChannelOption.SO_KEEPALIVE, true);
-        childChannelOption(ChannelOption.SO_KEEPALIVE, true);
         childChannelOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         return super.defaultChannelOptions();
     }

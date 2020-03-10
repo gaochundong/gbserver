@@ -1,5 +1,6 @@
 package ai.sangmado.gbserver.jt808.server;
 
+import ai.sangmado.gbprotocol.jt808.protocol.ISpecificationContext;
 import ai.sangmado.gbserver.common.protocol.RequestHandler;
 import ai.sangmado.gbserver.common.server.ConnectionBasedServerBuilder;
 import io.netty.bootstrap.ServerBootstrap;
@@ -10,19 +11,24 @@ import io.netty.bootstrap.ServerBootstrap;
  * @param <I> 读取连接通道的业务对象
  * @param <O> 写入连接通道的业务对象
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class JT808ServerBuilder<I, O> extends ConnectionBasedServerBuilder<I, O, JT808ServerBuilder<I, O>> {
+    private final ISpecificationContext ctx;
 
-    public JT808ServerBuilder(int port, RequestHandler<I, O> requestHandler) {
+    public JT808ServerBuilder(ISpecificationContext ctx, int port, RequestHandler<I, O> requestHandler) {
         super(port, new JT808ConnectionHandler<>(requestHandler));
+        this.ctx = ctx;
     }
 
-    public JT808ServerBuilder(int port, RequestHandler<I, O> requestHandler, ServerBootstrap bootstrap) {
+    public JT808ServerBuilder(ISpecificationContext ctx, int port, RequestHandler<I, O> requestHandler, ServerBootstrap bootstrap) {
         super(port, new JT808ConnectionHandler<>(requestHandler), bootstrap);
+        this.ctx = ctx;
     }
 
     @Override
     protected JT808Server<I, O> createServer() {
-        return new JT808Server<>(serverBootstrap, port, connectionHandler, eventExecutorGroup, pipelineConfigurator);
+        this.pipelineConfigurator(new JT808ServerPipelineConfigurator<>(this.ctx));
+        return new JT808Server<>(this.ctx, serverBootstrap, port, connectionHandler, eventExecutorGroup, pipelineConfigurator);
     }
 
     @Override
