@@ -29,7 +29,7 @@ public class PipelineConfiguratorComposite<I, O> implements PipelineConfigurator
     @Override
     public void configureNewPipeline(ChannelPipeline pipeline) {
         for (PipelineConfigurator configurator : configurators) {
-            if (null != configurator) {
+            if (configurator != null) {
                 configurator.configureNewPipeline(pipeline);
             }
         }

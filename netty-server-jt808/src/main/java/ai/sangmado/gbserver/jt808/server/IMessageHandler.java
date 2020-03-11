@@ -1,4 +1,4 @@
-package ai.sangmado.gbserver.common.protocol;
+package ai.sangmado.gbserver.jt808.server;
 
 /**
  * 业务请求处理器
@@ -6,7 +6,7 @@ package ai.sangmado.gbserver.common.protocol;
  * @param <I> 业务请求
  * @param <O> 业务回复
  */
-public interface RequestHandler<I, O> {
+public interface IMessageHandler<I, O> {
 
     void handle(I request, O response);
 }

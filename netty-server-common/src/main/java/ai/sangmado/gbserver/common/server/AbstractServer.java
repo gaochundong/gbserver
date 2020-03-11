@@ -1,6 +1,5 @@
 package ai.sangmado.gbserver.common.server;
 
-import ai.sangmado.gbserver.common.channel.ConnectionHandler;
 import ai.sangmado.gbserver.common.channel.UnpooledConnectionFactory;
 import ai.sangmado.gbserver.common.pipeline.PipelineConfigurator;
 import ai.sangmado.gbserver.common.pipeline.PipelineConfiguratorComposite;
@@ -16,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * 业务服务器构造器抽象类
+ * 业务服务器抽象类
  *
  * @param <I> 读取连接通道的业务对象
  * @param <O> 写入连接通道的业务对象
@@ -35,7 +34,6 @@ public abstract class AbstractServer<I, O, B extends AbstractBootstrap<B, C>, C 
     private ChannelFuture bindFuture;
 
     protected final UnpooledConnectionFactory<I, O> connectionFactory;
-    protected ErrorHandler errorHandler;
 
     protected AbstractServer(B bootstrap, int port) {
         if (bootstrap == null) throw new NullPointerException("Bootstrap can not be null.");
@@ -50,14 +48,6 @@ public abstract class AbstractServer<I, O, B extends AbstractBootstrap<B, C>, C 
     @SuppressWarnings("unchecked")
     protected S returnServer() {
         return (S) this;
-    }
-
-    public S withErrorHandler(ErrorHandler errorHandler) {
-        if (state.get() == ServerState.Started) {
-            throw new IllegalStateException("Error handler can not be set after starting the server.");
-        }
-        this.errorHandler = errorHandler;
-        return returnServer();
     }
 
     public void startAndWait() {
@@ -141,13 +131,13 @@ public abstract class AbstractServer<I, O, B extends AbstractBootstrap<B, C>, C 
         return new ChannelInitializer<Channel>() {
             @Override
             protected void initChannel(Channel ch) throws Exception {
-                ServerRequiredConfigurator<I, O> requiredConfigurator =
-                        new ServerRequiredConfigurator<>(connectionHandler, connectionFactory, errorHandler, connHandlingExecutor);
+                ServerRequiredConfigurator<I, O> serverRequiredConfigurator =
+                        new ServerRequiredConfigurator<>(connectionHandler, connectionFactory, connHandlingExecutor);
                 PipelineConfigurator<I, O> configurator;
-                if (null == pipelineConfigurator) {
-                    configurator = requiredConfigurator;
+                if (pipelineConfigurator == null) {
+                    configurator = serverRequiredConfigurator;
                 } else {
-                    configurator = new PipelineConfiguratorComposite<>(pipelineConfigurator, requiredConfigurator);
+                    configurator = new PipelineConfiguratorComposite<>(pipelineConfigurator, serverRequiredConfigurator);
                 }
                 configurator.configureNewPipeline(ch.pipeline());
             }

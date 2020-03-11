@@ -1,6 +1,5 @@
 package ai.sangmado.gbserver.common.server;
 
-import ai.sangmado.gbserver.common.channel.ConnectionHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;

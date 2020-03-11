@@ -2,7 +2,6 @@ package ai.sangmado.gbserver.common.server;
 
 import ai.sangmado.gbserver.common.channel.Connection;
 import ai.sangmado.gbserver.common.channel.ConnectionFactory;
-import ai.sangmado.gbserver.common.channel.ConnectionHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.ssl.SslHandler;
@@ -18,16 +17,13 @@ public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapt
 
     private final ConnectionHandler<I, O> connectionHandler;
     private final ConnectionFactory<I, O> connectionFactory;
-    private final ErrorHandler errorHandler;
     private Connection<I, O> connection;
 
     public ConnectionLifecycleHandler(
             ConnectionHandler<I, O> connectionHandler,
-            ConnectionFactory<I, O> connectionFactory,
-            ErrorHandler errorHandler) {
+            ConnectionFactory<I, O> connectionFactory) {
         this.connectionHandler = connectionHandler;
         this.connectionFactory = connectionFactory;
-        this.errorHandler = null == errorHandler ? new DefaultErrorHandler() : errorHandler;
     }
 
     @Override
@@ -62,7 +58,6 @@ public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapt
         try {
             connectionHandler.handle(connection);
         } catch (Exception ex) {
-            errorHandler.handleError(ex);
             connection.close();
         }
     }

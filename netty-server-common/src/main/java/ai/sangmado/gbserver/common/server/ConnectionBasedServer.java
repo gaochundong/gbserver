@@ -1,6 +1,5 @@
 package ai.sangmado.gbserver.common.server;
 
-import ai.sangmado.gbserver.common.channel.ConnectionHandler;
 import ai.sangmado.gbserver.common.pipeline.PipelineConfigurator;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ServerChannel;

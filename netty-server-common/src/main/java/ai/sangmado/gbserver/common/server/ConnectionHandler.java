@@ -1,4 +1,6 @@
-package ai.sangmado.gbserver.common.channel;
+package ai.sangmado.gbserver.common.server;
+
+import ai.sangmado.gbserver.common.channel.Connection;
 
 /**
  * 连接处理器
