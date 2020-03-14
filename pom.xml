@@ -14,6 +14,8 @@
         <module>netty-server-common</module>
         <module>netty-server-jt808</module>
         <module>netty-server-jt809</module>
+        <module>netty-server-jt808-application</module>
+        <module>netty-server-jt809-application</module>
     </modules>
 
     <properties>
