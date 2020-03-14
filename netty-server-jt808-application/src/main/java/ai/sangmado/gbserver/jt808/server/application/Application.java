@@ -9,17 +9,30 @@ import ai.sangmado.gbserver.jt808.server.JT808MessageHandler;
 import ai.sangmado.gbserver.jt808.server.JT808Server;
 import ai.sangmado.gbserver.jt808.server.JT808ServerBuilder;
 
+import java.io.IOException;
+
 /**
  * JT808 业务服务器应用程序
  */
+@SuppressWarnings("InfiniteLoopStatement")
 public class Application {
     public static void main(String[] args) {
         IBufferPool bufferPool = new PooledByteArrayFactory(512, 10);
         ISpecificationContext ctx = new JT808ProtocolSpecificationContext().withBufferPool(bufferPool);
         int port = 7200;
-        JT808MessageHandler<JT808MessagePacket, JT808MessagePacket> messageHandler = new JT808MessageHandler<>();
+        JT808MessageHandler<JT808MessagePacket, JT808MessagePacket> messageHandler = new JT808MessageHandler<>(ctx);
         JT808ServerBuilder<JT808MessagePacket, JT808MessagePacket> serverBuilder = new JT808ServerBuilder<>(ctx, port, messageHandler);
         JT808Server<JT808MessagePacket, JT808MessagePacket> server = serverBuilder.build();
-        server.startAndWait();
+        server.start();
+
+        try {
+            System.out.println("Server is started.");
+            while (true) {
+                int value = System.in.read();
+                System.out.println(value);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
