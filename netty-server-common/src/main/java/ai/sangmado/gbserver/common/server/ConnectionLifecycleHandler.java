@@ -27,19 +27,11 @@ public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapt
     }
 
     @Override
-    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        if (connection != null) {
-            connection.close();
-        }
-        super.channelUnregistered(ctx);
-    }
-
-    @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         if (ctx.channel().pipeline().get(SslHandler.class) == null) {
             connection = connectionFactory.newConnection(ctx.channel());
             super.channelActive(ctx);
-            handleConnection();
+            fireConnectionConnected();
         } else {
             super.channelActive(ctx);
         }
@@ -50,15 +42,27 @@ public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapt
         super.userEventTriggered(ctx, evt);
         if (evt instanceof SslHandshakeCompletionEvent) {
             connection = connectionFactory.newConnection(ctx.channel());
-            handleConnection();
+            fireConnectionConnected();
         }
     }
 
-    private void handleConnection() {
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         try {
-            connectionHandler.handle(connection);
-        } catch (Exception ex) {
-            connection.close();
+            if (connection != null) {
+                connection.close();
+            }
+            super.channelUnregistered(ctx);
+        } finally {
+            fireConnectionClosed();
         }
+    }
+
+    private void fireConnectionConnected() {
+        connectionHandler.fireConnectionConnected(connection);
+    }
+
+    private void fireConnectionClosed() {
+        connectionHandler.fireConnectionClosed(connection);
     }
 }

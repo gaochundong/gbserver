@@ -10,5 +10,7 @@ import ai.sangmado.gbserver.common.channel.Connection;
  */
 public interface ConnectionHandler<I, O> {
 
-    void handle(Connection<I, O> newConnection);
+    void fireConnectionConnected(Connection<I, O> connection);
+
+    void fireConnectionClosed(Connection<I, O> connection);
 }

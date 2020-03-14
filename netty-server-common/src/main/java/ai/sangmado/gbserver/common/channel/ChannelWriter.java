@@ -26,11 +26,11 @@ public interface ChannelWriter<O> {
 
     void writeStringAndFlush(String msg);
 
+    void flush();
+
     void close();
 
     void close(boolean flush);
-
-    void flush();
 
     ByteBufAllocator getAllocator();
 }

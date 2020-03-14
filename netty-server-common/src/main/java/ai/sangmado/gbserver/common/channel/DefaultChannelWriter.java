@@ -32,7 +32,7 @@ public class DefaultChannelWriter<O> implements ChannelWriter<O> {
 
     @SneakyThrows
     protected void writeOnChannel(Object msg) {
-        getChannel().write(msg).await();
+        getChannel().write(msg).syncUninterruptibly();
     }
 
     private <R> void write(R msg, ContentTransformer<R> transformer) {
@@ -57,31 +57,42 @@ public class DefaultChannelWriter<O> implements ChannelWriter<O> {
 
     @Override
     public void writeString(String msg) {
-        write(msg, new StringTransformer());
+        write(msg, StringTransformer.DEFAULT_INSTANCE);
+    }
+
+    @SneakyThrows
+    protected void writeAndFlushOnChannel(Object msg) {
+        getChannel().writeAndFlush(msg).syncUninterruptibly();
+    }
+
+    private <R> void writeAndFlush(R msg, ContentTransformer<R> transformer) {
+        ByteBuf contentBytes = transformer.apply(msg, getAllocator());
+        writeAndFlushOnChannel(contentBytes);
     }
 
     @Override
     public void writeAndFlush(O msg) {
-        write(msg);
-        flush();
+        writeAndFlushOnChannel(msg);
     }
 
     @Override
     public void writeBytesAndFlush(ByteBuf msg) {
-        writeBytes(msg);
-        flush();
+        writeAndFlush(msg, RelayTransformer.DEFAULT_INSTANCE);
     }
 
     @Override
     public void writeBytesAndFlush(byte[] msg) {
-        write(msg, ByteTransformer.DEFAULT_INSTANCE);
-        flush();
+        writeAndFlush(msg, ByteTransformer.DEFAULT_INSTANCE);
     }
 
     @Override
     public void writeStringAndFlush(String msg) {
-        write(msg, new StringTransformer());
-        flush();
+        writeAndFlush(msg, StringTransformer.DEFAULT_INSTANCE);
+    }
+
+    @Override
+    public void flush() {
+        getChannel().flush();
     }
 
     public boolean isCloseIssued() {
@@ -106,12 +117,7 @@ public class DefaultChannelWriter<O> implements ChannelWriter<O> {
     }
 
     @Override
-    public void flush() {
-        nettyChannel.flush();
-    }
-
-    @Override
     public ByteBufAllocator getAllocator() {
-        return nettyChannel.alloc();
+        return getChannel().alloc();
     }
 }
