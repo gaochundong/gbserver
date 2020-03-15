@@ -36,7 +36,7 @@ public class JT808MessageHandler<I extends JT808MessagePacket, O extends JT808Me
     protected void decode(ChannelHandlerContext ctx, JT808MessagePacket msg, List<Object> out) throws Exception {
         String connectionId = ctx.channel().id().asLongText();
         Connection<I, O> connection = connections.get(connectionId);
-
+        System.out.println(connectionId + " 接收到 " + msg.getHeader().getMessageId().getName());
         out.add(msg);
     }
 }
