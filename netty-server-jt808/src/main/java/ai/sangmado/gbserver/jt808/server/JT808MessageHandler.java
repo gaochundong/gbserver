@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * JT808 业务请求处理器
+ * JT808 业务消息处理器
  */
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class JT808MessageHandler<I extends JT808MessagePacket, O extends JT808MessagePacket> extends MessageToMessageDecoder<JT808MessagePacket> {
