@@ -6,10 +6,12 @@ import ai.sangmado.gbprotocol.jt808.protocol.ISpecificationContext;
 import ai.sangmado.gbprotocol.jt808.protocol.message.JT808MessagePacket;
 import ai.sangmado.gbserver.common.pipeline.PipelineConfigurator;
 import io.netty.channel.ChannelPipeline;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * JT808 服务器管道配置
  */
+@Slf4j
 public class JT808ServerPipelineConfigurator<I extends JT808MessagePacket, O extends JT808MessagePacket> implements PipelineConfigurator<I, O> {
     private final ISpecificationContext ctx;
     private final JT808MessageHandler<I, O> messageHandler;

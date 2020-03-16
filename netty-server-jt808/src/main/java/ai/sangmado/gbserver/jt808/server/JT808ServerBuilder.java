@@ -6,10 +6,12 @@ import ai.sangmado.gbserver.common.pipeline.PipelineConfigurator;
 import ai.sangmado.gbserver.common.server.ConnectionBasedServerBuilder;
 import ai.sangmado.gbserver.common.server.ConnectionHandler;
 import io.netty.bootstrap.ServerBootstrap;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * JT808 业务服务器构造器
  */
+@Slf4j
 @SuppressWarnings("FieldCanBeLocal")
 public class JT808ServerBuilder<I extends JT808MessagePacket, O extends JT808MessagePacket> extends ConnectionBasedServerBuilder<I, O, JT808ServerBuilder<I, O>> {
     private final ISpecificationContext ctx;

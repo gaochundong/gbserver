@@ -7,10 +7,12 @@ import ai.sangmado.gbserver.common.server.ConnectionBasedServer;
 import ai.sangmado.gbserver.common.server.ConnectionHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.util.concurrent.EventExecutorGroup;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * JT808 业务服务器
  */
+@Slf4j
 @SuppressWarnings("FieldCanBeLocal")
 public class JT808Server<I extends JT808MessagePacket, O extends JT808MessagePacket> extends ConnectionBasedServer<I, O> {
     private final ISpecificationContext ctx;
