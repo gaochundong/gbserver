@@ -23,6 +23,11 @@ public class Connection<I, O> extends DefaultChannelWriter<O> {
         return !this.isCloseIssued() && this.getChannel() != null && this.getChannel().isActive();
     }
 
+    @Override
+    public String toString() {
+        return getConnectionId();
+    }
+
     public static <I, O> Connection<I, O> create(final Channel channel) {
         return new Connection<>(channel);
     }

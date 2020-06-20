@@ -27,8 +27,8 @@ public class JT808ConnectionHandler<I extends JT808MessagePacket, O extends JT80
     }
 
     @Override
-    public void fireConnectionClosed(Connection<I, O> connection) {
-        log.info("连接已关闭, connectionId[{}]", connection.getConnectionId());
-        messageHandler.notifyConnectionClosed(connection);
+    public void fireConnectionClosed(String connectionId) {
+        log.info("连接已关闭, connectionId[{}]", connectionId);
+        messageHandler.notifyConnectionClosed(connectionId);
     }
 }

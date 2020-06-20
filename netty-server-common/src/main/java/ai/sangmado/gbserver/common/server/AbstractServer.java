@@ -61,7 +61,7 @@ public abstract class AbstractServer<I, O, B extends AbstractBootstrap<B, C>, C 
 
     public S start() {
         if (!state.compareAndSet(ServerState.Created, ServerState.Starting)) {
-            throw new IllegalStateException("Server already started");
+            throw new IllegalStateException("服务器已经启动");
         }
 
         try {
@@ -80,7 +80,7 @@ public abstract class AbstractServer<I, O, B extends AbstractBootstrap<B, C>, C 
 
     public void shutdown() throws InterruptedException {
         if (!state.compareAndSet(ServerState.Started, ServerState.Shutdown)) {
-            throw new IllegalStateException("The server is already shutdown.");
+            throw new IllegalStateException("服务器已经被关闭");
         } else {
             bindFuture.channel().close().sync();
         }
@@ -91,7 +91,7 @@ public abstract class AbstractServer<I, O, B extends AbstractBootstrap<B, C>, C 
         switch (serverState) {
             case Created:
             case Starting:
-                throw new IllegalStateException("Server not started yet.");
+                throw new IllegalStateException("服务器还未启动");
             case Started:
                 bindFuture.channel().closeFuture().await();
                 break;
@@ -105,7 +105,7 @@ public abstract class AbstractServer<I, O, B extends AbstractBootstrap<B, C>, C 
         switch (serverState) {
             case Created:
             case Starting:
-                throw new IllegalStateException("Server not started yet.");
+                throw new IllegalStateException("服务器还未启动");
             case Started:
                 bindFuture.channel().closeFuture().await(duration, timeUnit);
                 break;

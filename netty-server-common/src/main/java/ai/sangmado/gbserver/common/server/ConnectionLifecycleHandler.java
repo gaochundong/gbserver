@@ -6,6 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.SslHandshakeCompletionEvent;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 连接生命周期管理器
@@ -13,11 +14,11 @@ import io.netty.handler.ssl.SslHandshakeCompletionEvent;
  * @param <I> 读取连接通道的业务对象
  * @param <O> 写入连接通道的业务对象
  */
+@Slf4j
 public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapter {
 
     private final ConnectionHandler<I, O> connectionHandler;
     private final ConnectionFactory<I, O> connectionFactory;
-    private Connection<I, O> connection;
 
     public ConnectionLifecycleHandler(
             ConnectionHandler<I, O> connectionHandler,
@@ -29,9 +30,9 @@ public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapt
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         if (ctx.channel().pipeline().get(SslHandler.class) == null) {
-            connection = connectionFactory.newConnection(ctx.channel());
+            Connection<I, O> connection = connectionFactory.newConnection(ctx.channel());
             super.channelActive(ctx);
-            fireConnectionConnected();
+            fireConnectionConnected(connection);
         } else {
             super.channelActive(ctx);
         }
@@ -41,28 +42,28 @@ public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapt
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         super.userEventTriggered(ctx, evt);
         if (evt instanceof SslHandshakeCompletionEvent) {
-            connection = connectionFactory.newConnection(ctx.channel());
-            fireConnectionConnected();
+            Connection<I, O> connection = connectionFactory.newConnection(ctx.channel());
+            fireConnectionConnected(connection);
         }
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         try {
-            if (connection != null) {
-                connection.close();
-            }
             super.channelUnregistered(ctx);
         } finally {
-            fireConnectionClosed();
+            String connectionId = ctx.channel().id().asLongText();
+            fireConnectionClosed(connectionId);
         }
     }
 
-    private void fireConnectionConnected() {
+    private void fireConnectionConnected(Connection<I, O> connection) {
+        log.info("通道连接建立, connectionId[{}]", connection.getConnectionId());
         connectionHandler.fireConnectionConnected(connection);
     }
 
-    private void fireConnectionClosed() {
-        connectionHandler.fireConnectionClosed(connection);
+    private void fireConnectionClosed(String connectionId) {
+        log.info("通道连接关闭, connectionId[{}]", connectionId);
+        connectionHandler.fireConnectionClosed(connectionId);
     }
 }
