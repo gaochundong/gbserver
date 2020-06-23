@@ -70,9 +70,11 @@ public class Application {
 
     private static void logPacket(Connection<JT808MessagePacket, JT808MessagePacket> connection, JT808MessagePacket packet) {
         String json = Jackson.toJsonPrettyString(packet);
-        log.info("通过连接 [{}] 向设备发送消息, 协议版本[{}], 消息ID[{}]{}{}",
+        log.info("通过连接 [{}] 向设备发送消息, 协议版本[{}], 消息ID[{}/{}]{}{}",
                 connection.getConnectionId(),
-                packet.getProtocolVersion().getName(), packet.getMessageId().getName(),
+                packet.getProtocolVersion().getName(),
+                packet.getMessageId().getName(),
+                packet.getMessageId().getDescription(),
                 System.lineSeparator(), json);
     }
 
