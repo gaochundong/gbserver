@@ -19,30 +19,30 @@ import java.util.concurrent.ConcurrentHashMap;
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class JT808MessageHandler<I extends JT808MessagePacket, O extends JT808MessagePacket> extends MessageToMessageDecoder<JT808MessagePacket> {
     private final ISpecificationContext ctx;
-    private final Map<String, Connection<I, O>> connections = new ConcurrentHashMap<>(1000);
+    private final Map<String, Connection<I, O>> establishedConnections = new ConcurrentHashMap<>(64);
 
     public JT808MessageHandler(ISpecificationContext ctx) {
         this.ctx = ctx;
     }
 
     public Map<String, Connection<I, O>> getEstablishedConnections() {
-        return connections;
+        return establishedConnections;
     }
 
     public void notifyConnectionConnected(Connection<I, O> connection) {
         log.info("设备建立连接, connectionId[{}]", connection.getConnectionId());
-        connections.put(connection.getConnectionId(), connection);
+        establishedConnections.put(connection.getConnectionId(), connection);
     }
 
     public void notifyConnectionClosed(String connectionId) {
         log.info("设备关闭连接, connectionId[{}]", connectionId);
-        connections.remove(connectionId);
+        establishedConnections.remove(connectionId);
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, JT808MessagePacket msg, List<Object> out) throws Exception {
         String connectionId = ctx.channel().id().asLongText();
-        Connection<I, O> connection = connections.get(connectionId);
+        Connection<I, O> connection = establishedConnections.get(connectionId);
 
         String json = Jackson.toJsonPrettyString(msg);
         log.info("从设备连接 [{}] 中接收到消息, 协议版本[{}], 消息ID[{}/{}]{}{}",

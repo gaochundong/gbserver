@@ -87,6 +87,13 @@
                 <version>${gbprotocol.version}</version>
             </dependency>
 
+            <!--jt1078-->
+            <dependency>
+                <groupId>ai.sangmado.gbprotocol</groupId>
+                <artifactId>jt1078</artifactId>
+                <version>${gbprotocol.version}</version>
+            </dependency>
+
             <!--netty-codec-jt808-->
             <dependency>
                 <groupId>ai.sangmado.gbcodec</groupId>

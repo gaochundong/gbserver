@@ -22,7 +22,7 @@ public class JT808ConnectionHandler<I extends JT808MessagePacket, O extends JT80
 
     @Override
     public void fireConnectionConnected(Connection<I, O> connection) {
-        log.info("已建立新连接, connectionId[{}]", connection.getConnectionId());
+        log.info("连接已建立, connectionId[{}]", connection.getConnectionId());
         messageHandler.notifyConnectionConnected(connection);
     }
 

@@ -33,6 +33,12 @@
             <artifactId>jt809</artifactId>
         </dependency>
 
+        <!--jt1078-->
+        <dependency>
+            <groupId>ai.sangmado.gbprotocol</groupId>
+            <artifactId>jt1078</artifactId>
+        </dependency>
+
         <!--netty-codec-jt809-->
         <dependency>
             <groupId>ai.sangmado.gbcodec</groupId>
