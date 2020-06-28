@@ -93,11 +93,11 @@ public class Application {
 
     private static void logPacket(Connection<JT808MessagePacket, JT808MessagePacket> connection, JT808MessagePacket packet) {
         String json = Jackson.toJsonPrettyString(packet);
-        log.info("通过连接 [{}] 向设备发送消息, 协议版本[{}], 消息ID[{}/{}]{}{}",
-                connection.getConnectionId(),
-                packet.getProtocolVersion().getName(),
+        log.info("向设备发送消息, 消息ID[{}], 消息名称[{}], 协议版本[{}], 连接ID[{}]{}{}",
                 packet.getMessageId().getName(),
                 packet.getMessageId().getDescription(),
+                packet.getProtocolVersion().getName(),
+                connection.getConnectionId(),
                 System.lineSeparator(), json);
     }
 
