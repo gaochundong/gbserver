@@ -30,12 +30,12 @@ public class JT808MessageHandler<I extends JT808MessagePacket, O extends JT808Me
     }
 
     public void notifyConnectionConnected(Connection<I, O> connection) {
-        log.info("设备建立连接, connectionId[{}]", connection.getConnectionId());
+        log.info("设备建立连接, 连接ID[{}]", connection.getConnectionId());
         establishedConnections.put(connection.getConnectionId(), connection);
     }
 
     public void notifyConnectionClosed(String connectionId) {
-        log.info("设备关闭连接, connectionId[{}]", connectionId);
+        log.info("设备关闭连接, 连接ID[{}]", connectionId);
         establishedConnections.remove(connectionId);
     }
 
