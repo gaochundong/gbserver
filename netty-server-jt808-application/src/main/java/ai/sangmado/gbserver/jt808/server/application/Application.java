@@ -1,26 +1,27 @@
 package ai.sangmado.gbserver.jt808.server.application;
 
 import ai.sangmado.gbprotocol.gbcommon.memory.PooledByteArrayFactory;
-import ai.sangmado.gbprotocol.jt1078.protocol.enums.JT1078MessageId;
+import ai.sangmado.gbprotocol.jt1078.protocol.enums.*;
+import ai.sangmado.gbprotocol.jt1078.protocol.message.content.JT1078_Message_Content_0x9101;
+import ai.sangmado.gbprotocol.jt1078.protocol.message.content.JT1078_Message_Content_0x9102;
 import ai.sangmado.gbprotocol.jt1078.protocol.message.content.JT1078_Message_Content_0x9105;
 import ai.sangmado.gbprotocol.jt1078.protocol.message.extension.JT1078MessageExtension;
 import ai.sangmado.gbprotocol.jt808.protocol.ISpecificationContext;
 import ai.sangmado.gbprotocol.jt808.protocol.JT808ProtocolSpecificationContext;
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808DeviceRegistrationResult;
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808MessageId;
+import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808PlatformCommonReplyResult;
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808ProtocolVersion;
 import ai.sangmado.gbprotocol.jt808.protocol.message.JT808MessagePacket;
 import ai.sangmado.gbprotocol.jt808.protocol.message.JT808MessagePacketBuilder;
-import ai.sangmado.gbprotocol.jt808.protocol.message.content.JT808MessageContent;
-import ai.sangmado.gbprotocol.jt808.protocol.message.content.JT808_Message_Content_0x8100;
-import ai.sangmado.gbprotocol.jt808.protocol.message.content.JT808_Message_Content_0x8201;
-import ai.sangmado.gbprotocol.jt808.protocol.message.content.JT808_Message_Content_0x8204;
+import ai.sangmado.gbprotocol.jt808.protocol.message.content.*;
 import ai.sangmado.gbprotocol.jt808.protocol.message.header.JT808MessageHeader;
 import ai.sangmado.gbprotocol.jt808.protocol.message.header.JT808MessageHeaderFactory;
 import ai.sangmado.gbserver.common.channel.Connection;
 import ai.sangmado.gbserver.jt808.server.*;
 import ai.sangmado.gbserver.jt808.server.utils.GlobalSerialNumberIssuer;
 import ai.sangmado.gbserver.jt808.server.utils.Jackson;
+import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public class Application {
 
     public static void main(String[] args) {
         ISpecificationContext ctx = new JT808ProtocolSpecificationContext()
-                .withProtocolVersion(JT808ProtocolVersion.V2013)
+                .withProtocolVersion(JT808ProtocolVersion.V2011)
                 .withBufferPool(new PooledByteArrayFactory(512, 10));
 
         // 加载 JT1078 协议消息扩展
@@ -64,6 +65,10 @@ public class Application {
                 Connection<JT808MessagePacket, JT808MessagePacket> connection = establishedConnection.get();
                 JT808MessagePacket packet = null;
                 switch (inputString) {
+                    case "0x8001": { // 平台通用应答
+                        packet = create_JT808_Message_0x8001_packet(ctx);
+                        break;
+                    }
                     case "0x8100": { // 平台终端注册应答
                         packet = create_JT808_Message_0x8100_packet(ctx);
                         break;
@@ -74,6 +79,14 @@ public class Application {
                     }
                     case "0x8204": { // 平台终端链路检测指令
                         packet = create_JT808_Message_0x8204_packet(ctx);
+                        break;
+                    }
+                    case "0x9101": { // 平台下发实时音视频传输请求 - JT1078
+                        packet = create_JT1078_Message_0x9101_packet(ctx);
+                        break;
+                    }
+                    case "0x9102": { // 平台下发音视频实时传输控制 - JT1078
+                        packet = create_JT1078_Message_0x9102_packet(ctx);
                         break;
                     }
                     case "0x9105": { // 平台下发实时音视频传输状态通知 - JT1078
@@ -99,6 +112,32 @@ public class Application {
                 packet.getProtocolVersion().getName(),
                 connection.getConnectionId(),
                 System.lineSeparator(), json);
+    }
+
+    // 平台通用应答
+    private static JT808MessagePacket create_JT808_Message_0x8001_packet(ISpecificationContext ctx) {
+        JT808MessageId messageId = JT808MessageId.JT808_Message_0x8001;
+        String phoneNumber = "861064602988";
+        int serialNumber = GlobalSerialNumberIssuer.next();
+
+        // 回复终端成功
+        int ackSerialNumber = 2;
+        JT808MessageId ackId = JT808MessageId.JT808_Message_0x0102;
+        JT808PlatformCommonReplyResult result = JT808PlatformCommonReplyResult.Success;
+
+        JT808MessageHeader header = JT808MessageHeaderFactory
+                .buildWith(ctx)
+                .withMessageId(messageId)
+                .withPhoneNumber(phoneNumber)
+                .withSerialNumber(serialNumber);
+        JT808MessageContent content = JT808_Message_Content_0x8001.builder()
+                .ackSerialNumber(ackSerialNumber)
+                .ackId(ackId)
+                .result(result)
+                .build();
+
+        List<JT808MessagePacket> packets = JT808MessagePacketBuilder.buildPackets(ctx, header, content);
+        return packets.get(0);
     }
 
     // 平台终端注册应答
@@ -162,6 +201,65 @@ public class Application {
         return packets.get(0);
     }
 
+    // 平台下发实时音视频传输请求
+    private static JT808MessagePacket create_JT1078_Message_0x9101_packet(ISpecificationContext ctx) {
+        JT1078MessageId messageId = JT1078MessageId.JT1078_Message_0x9101;
+        String phoneNumber = "861064602988";
+        int serialNumber = GlobalSerialNumberIssuer.next();
+
+        // 通过环境变量加载服务器参数
+        final String ENV_JT1078_STREAM_SERVER_HOST = "JT1078_STREAM_SERVER_HOST";
+        final String ENV_JT1078_STREAM_SERVER_TCP_PORT = "JT1078_STREAM_SERVER_TCP_PORT";
+        final String ENV_JT1078_STREAM_SERVER_UDP_PORT = "JT1078_STREAM_SERVER_UDP_PORT";
+
+        String envServerIPAddress = System.getenv(ENV_JT1078_STREAM_SERVER_HOST);
+        String serverIPAddress = !Strings.isNullOrEmpty(envServerIPAddress) ? envServerIPAddress : "127.0.0.1";
+        String envServerTcpPort = System.getenv(ENV_JT1078_STREAM_SERVER_TCP_PORT);
+        int serverTcpPort = !Strings.isNullOrEmpty(envServerTcpPort) ? Integer.parseInt(envServerTcpPort) : 0;
+        String envServerUdpPort = System.getenv(ENV_JT1078_STREAM_SERVER_UDP_PORT);
+        int serverUdpPort = !Strings.isNullOrEmpty(envServerUdpPort) ? Integer.parseInt(envServerUdpPort) : 0;
+
+        JT808MessageHeader header = JT808MessageHeaderFactory
+                .buildWith(ctx)
+                .withMessageId(messageId)
+                .withPhoneNumber(phoneNumber)
+                .withSerialNumber(serialNumber);
+        JT808MessageContent content = JT1078_Message_Content_0x9101.builder()
+                .streamingServerIPAddressLength(serverIPAddress.length())
+                .streamingServerIPAddress(serverIPAddress)
+                .streamingServerTcpPort(serverTcpPort)
+                .streamingServerUdpPort(serverUdpPort)
+                .logicalChannelNumber(LogicalChannelNumber.Channel1)
+                .streamingDataType(StreamingDataType.AV)
+                .channelStreamType(ChannelStreamType.Main)
+                .build();
+
+        List<JT808MessagePacket> packets = JT808MessagePacketBuilder.buildPackets(ctx, header, content);
+        return packets.get(0);
+    }
+
+    // 平台下发音视频实时传输控制
+    private static JT808MessagePacket create_JT1078_Message_0x9102_packet(ISpecificationContext ctx) {
+        JT1078MessageId messageId = JT1078MessageId.JT1078_Message_0x9102;
+        String phoneNumber = "861064602988";
+        int serialNumber = GlobalSerialNumberIssuer.next();
+
+        JT808MessageHeader header = JT808MessageHeaderFactory
+                .buildWith(ctx)
+                .withMessageId(messageId)
+                .withPhoneNumber(phoneNumber)
+                .withSerialNumber(serialNumber);
+        JT808MessageContent content = JT1078_Message_Content_0x9102.builder()
+                .logicalChannelNumber(LogicalChannelNumber.Channel1)
+                .channelControlCommand(ChannelControlCommand.CloseChannel)
+                .channelCloseKind(ChannelCloseKind.CloseChannel)
+                .channelSwitchStreamKind(ChannelSwitchStreamKind.Main)
+                .build();
+
+        List<JT808MessagePacket> packets = JT808MessagePacketBuilder.buildPackets(ctx, header, content);
+        return packets.get(0);
+    }
+
     // 平台下发实时音视频传输状态通知
     private static JT808MessagePacket create_JT1078_Message_0x9105_packet(ISpecificationContext ctx) {
         JT1078MessageId messageId = JT1078MessageId.JT1078_Message_0x9105;
@@ -174,7 +272,7 @@ public class Application {
                 .withPhoneNumber(phoneNumber)
                 .withSerialNumber(serialNumber);
         JT808MessageContent content = JT1078_Message_Content_0x9105.builder()
-                .logicalChannelNumber(3)
+                .logicalChannelNumber(LogicalChannelNumber.Channel1)
                 .packetLossRate(400)
                 .build();
 
