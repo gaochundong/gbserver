@@ -45,9 +45,9 @@ public class Application {
 
         int port = 7200;
 
-        JT808MessageHandler<JT808MessagePacket, JT808MessagePacket> messageHandler = new JT808MessageHandler<>(ctx);
-        JT808ConnectionHandler<JT808MessagePacket, JT808MessagePacket> connectionHandler = new JT808ConnectionHandler<>(ctx, messageHandler);
-        JT808ServerPipelineConfigurator<JT808MessagePacket, JT808MessagePacket> pipelineConfigurator = new JT808ServerPipelineConfigurator<>(ctx, messageHandler);
+        JT808MessageProcessor<JT808MessagePacket, JT808MessagePacket> messageProcessor = new JT808MessageProcessor<>(ctx);
+        JT808ConnectionHandler<JT808MessagePacket, JT808MessagePacket> connectionHandler = new JT808ConnectionHandler<>(ctx, messageProcessor);
+        JT808ServerPipelineConfigurator<JT808MessagePacket, JT808MessagePacket> pipelineConfigurator = new JT808ServerPipelineConfigurator<>(ctx, messageProcessor);
         JT808ServerBuilder<JT808MessagePacket, JT808MessagePacket> serverBuilder = new JT808ServerBuilder<>(ctx, port, connectionHandler, pipelineConfigurator);
         JT808Server<JT808MessagePacket, JT808MessagePacket> server = serverBuilder.build();
 
@@ -60,7 +60,7 @@ public class Application {
             log.info("输入参数: " + inputString);
             try {
                 Optional<Connection<JT808MessagePacket, JT808MessagePacket>> establishedConnection =
-                        messageHandler.getEstablishedConnections().values().stream().findFirst();
+                        messageProcessor.getEstablishedConnections().values().stream().findFirst();
                 if (!establishedConnection.isPresent()) continue;
                 Connection<JT808MessagePacket, JT808MessagePacket> connection = establishedConnection.get();
                 JT808MessagePacket packet = null;

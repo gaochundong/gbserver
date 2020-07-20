@@ -11,4 +11,6 @@ import io.netty.channel.Channel;
 public interface ConnectionFactory<I, O> {
 
     Connection<I, O> newConnection(Channel channel);
+
+    Connection<I, O> wrapClosedConnection(Channel closedChannel);
 }

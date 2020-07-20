@@ -12,5 +12,5 @@ public interface ConnectionHandler<I, O> {
 
     void fireConnectionConnected(Connection<I, O> connection);
 
-    void fireConnectionClosed(String connectionId);
+    void fireConnectionClosed(Connection<I, O> connection);
 }

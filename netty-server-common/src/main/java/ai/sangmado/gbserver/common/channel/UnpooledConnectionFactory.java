@@ -20,4 +20,10 @@ public class UnpooledConnectionFactory<I, O> implements ConnectionFactory<I, O> 
         log.info("创建新连接, remoteAddress[{}]", channel.remoteAddress());
         return Connection.create(channel);
     }
+
+    @Override
+    public Connection<I, O> wrapClosedConnection(Channel closedChannel) {
+        log.info("封装已关闭通道连接, remoteAddress[{}]", closedChannel.remoteAddress());
+        return Connection.create(closedChannel);
+    }
 }

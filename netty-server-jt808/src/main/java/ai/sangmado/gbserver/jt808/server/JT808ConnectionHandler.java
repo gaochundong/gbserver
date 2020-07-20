@@ -13,22 +13,22 @@ import lombok.extern.slf4j.Slf4j;
 @SuppressWarnings("FieldCanBeLocal")
 public class JT808ConnectionHandler<I extends JT808MessagePacket, O extends JT808MessagePacket> implements ConnectionHandler<I, O> {
     private final ISpecificationContext ctx;
-    private final JT808MessageHandler<I, O> messageHandler;
+    private final JT808MessageProcessor<I, O> subscriber;
 
-    public JT808ConnectionHandler(ISpecificationContext ctx, JT808MessageHandler<I, O> messageHandler) {
+    public JT808ConnectionHandler(ISpecificationContext ctx, JT808MessageProcessor<I, O> subscriber) {
         this.ctx = ctx;
-        this.messageHandler = messageHandler;
+        this.subscriber = subscriber;
     }
 
     @Override
     public void fireConnectionConnected(Connection<I, O> connection) {
         log.info("连接已建立, connectionId[{}]", connection.getConnectionId());
-        messageHandler.notifyConnectionConnected(connection);
+        subscriber.notifyConnectionConnected(connection);
     }
 
     @Override
-    public void fireConnectionClosed(String connectionId) {
-        log.info("连接已关闭, connectionId[{}]", connectionId);
-        messageHandler.notifyConnectionClosed(connectionId);
+    public void fireConnectionClosed(Connection<I, O> connection) {
+        log.info("连接已关闭, connectionId[{}]", connection.getConnectionId());
+        subscriber.notifyConnectionClosed(connection);
     }
 }

@@ -17,11 +17,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
-public class JT808MessageHandler<I extends JT808MessagePacket, O extends JT808MessagePacket> extends MessageToMessageDecoder<JT808MessagePacket> {
+public class JT808MessageProcessor<I extends JT808MessagePacket, O extends JT808MessagePacket> extends MessageToMessageDecoder<JT808MessagePacket> {
     private final ISpecificationContext ctx;
     private final Map<String, Connection<I, O>> establishedConnections = new ConcurrentHashMap<>(64);
 
-    public JT808MessageHandler(ISpecificationContext ctx) {
+    public JT808MessageProcessor(ISpecificationContext ctx) {
         this.ctx = ctx;
     }
 
@@ -34,9 +34,9 @@ public class JT808MessageHandler<I extends JT808MessagePacket, O extends JT808Me
         establishedConnections.put(connection.getConnectionId(), connection);
     }
 
-    public void notifyConnectionClosed(String connectionId) {
-        log.info("设备关闭连接, 连接ID[{}]", connectionId);
-        establishedConnections.remove(connectionId);
+    public void notifyConnectionClosed(Connection<I, O> connection) {
+        log.info("设备关闭连接, 连接ID[{}]", connection.getConnectionId());
+        establishedConnections.remove(connection.getConnectionId());
     }
 
     @Override

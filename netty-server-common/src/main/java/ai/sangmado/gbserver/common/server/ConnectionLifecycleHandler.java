@@ -52,8 +52,8 @@ public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapt
         try {
             super.channelUnregistered(ctx);
         } finally {
-            String connectionId = ctx.channel().id().asLongText();
-            fireConnectionClosed(connectionId);
+            Connection<I, O> closedConnection = connectionFactory.wrapClosedConnection(ctx.channel());
+            fireConnectionClosed(closedConnection);
         }
     }
 
@@ -62,8 +62,8 @@ public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapt
         connectionHandler.fireConnectionConnected(connection);
     }
 
-    private void fireConnectionClosed(String connectionId) {
-        log.info("通道连接关闭, connectionId[{}]", connectionId);
-        connectionHandler.fireConnectionClosed(connectionId);
+    private void fireConnectionClosed(Connection<I, O> connection) {
+        log.info("通道连接关闭, connectionId[{}]", connection.getConnectionId());
+        connectionHandler.fireConnectionClosed(connection);
     }
 }
