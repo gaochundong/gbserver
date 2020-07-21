@@ -19,6 +19,12 @@ import ai.sangmado.gbprotocol.jt808.protocol.message.header.JT808MessageHeader;
 import ai.sangmado.gbprotocol.jt808.protocol.message.header.JT808MessageHeaderFactory;
 import ai.sangmado.gbserver.common.channel.Connection;
 import ai.sangmado.gbserver.jt808.server.*;
+import ai.sangmado.gbserver.jt808.server.application.handler.JT808MessageConsumer;
+import ai.sangmado.gbserver.jt808.server.application.handler.JT808MessageHandlerMapping;
+import ai.sangmado.gbserver.jt808.server.application.handler.jt1078.JT1078_Message_Handler_0x1206;
+import ai.sangmado.gbserver.jt808.server.application.handler.jt808.JT808_Message_Handler_0x0001;
+import ai.sangmado.gbserver.jt808.server.application.handler.jt808.JT808_Message_Handler_0x0100;
+import ai.sangmado.gbserver.jt808.server.dispatch.JT808MessageDispatcher;
 import ai.sangmado.gbserver.jt808.server.utils.GlobalSerialNumberIssuer;
 import ai.sangmado.gbserver.jt808.server.utils.Jackson;
 import com.google.common.base.Strings;
@@ -36,19 +42,29 @@ import java.util.Scanner;
 public class Application {
 
     public static void main(String[] args) {
+        // 协议上下文仅与协议报文序列化和反序列化过程相关
         ISpecificationContext ctx = new JT808ProtocolSpecificationContext()
                 .withProtocolVersion(JT808ProtocolVersion.V2011)
                 .withBufferPool(new PooledByteArrayFactory(512, 10));
 
-        // 加载 JT1078 协议消息扩展
-        JT1078MessageExtension.extend();
-
+        // 服务监听端口
         int port = 7200;
 
-        JT808MessageProcessor<JT808MessagePacket, JT808MessagePacket> messageProcessor = new JT808MessageProcessor<>(ctx);
-        JT808ConnectionHandler<JT808MessagePacket, JT808MessagePacket> connectionHandler = new JT808ConnectionHandler<>(ctx, messageProcessor);
+        // 加载JT1078协议消息扩展
+        JT1078MessageExtension.extend();
+
+        // 注册业务域消息处理器, 此处可应用IoC容器自动发现机制或者类反射扫描机制等进行处理器映射
+        JT808MessageHandlerMapping<JT808MessagePacket, JT808MessagePacket> messageHandlerMapping = new JT808MessageHandlerMapping<>();
+        messageHandlerMapping.addHandler(new JT808_Message_Handler_0x0001<>(ctx));
+        messageHandlerMapping.addHandler(new JT808_Message_Handler_0x0100<>(ctx));
+        messageHandlerMapping.addHandler(new JT1078_Message_Handler_0x1206<>(ctx));
+
+        JT808MessageConsumer<JT808MessagePacket, JT808MessagePacket> messageConsumer = new JT808MessageConsumer<>(messageHandlerMapping.getHandlers());
+        JT808MessageDispatcher<JT808MessagePacket, JT808MessagePacket> messageDispatcher = new JT808MessageDispatcher<>().bindSubscriber(messageConsumer);
+        JT808ConnectionHandler<JT808MessagePacket, JT808MessagePacket> connectionHandler = new JT808ConnectionHandler<>();
+        JT808MessageProcessor<JT808MessagePacket, JT808MessagePacket> messageProcessor = new JT808MessageProcessor<>(connectionHandler, messageDispatcher);
         JT808ServerPipelineConfigurator<JT808MessagePacket, JT808MessagePacket> pipelineConfigurator = new JT808ServerPipelineConfigurator<>(ctx, messageProcessor);
-        JT808ServerBuilder<JT808MessagePacket, JT808MessagePacket> serverBuilder = new JT808ServerBuilder<>(ctx, port, connectionHandler, pipelineConfigurator);
+        JT808ServerBuilder<JT808MessagePacket, JT808MessagePacket> serverBuilder = new JT808ServerBuilder<>(port, connectionHandler, pipelineConfigurator);
         JT808Server<JT808MessagePacket, JT808MessagePacket> server = serverBuilder.build();
 
         server.start();
@@ -60,8 +76,8 @@ public class Application {
             log.info("输入参数: " + inputString);
             try {
                 Optional<Connection<JT808MessagePacket, JT808MessagePacket>> establishedConnection =
-                        messageProcessor.getEstablishedConnections().values().stream().findFirst();
-                if (!establishedConnection.isPresent()) continue;
+                        connectionHandler.getEstablishedConnections().values().stream().findFirst();
+                if (establishedConnection.isEmpty()) continue;
                 Connection<JT808MessagePacket, JT808MessagePacket> connection = establishedConnection.get();
                 JT808MessagePacket packet = null;
                 switch (inputString) {

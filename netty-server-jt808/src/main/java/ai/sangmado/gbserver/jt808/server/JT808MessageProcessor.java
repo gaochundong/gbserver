@@ -1,55 +1,50 @@
 package ai.sangmado.gbserver.jt808.server;
 
-import ai.sangmado.gbprotocol.jt808.protocol.ISpecificationContext;
 import ai.sangmado.gbprotocol.jt808.protocol.message.JT808MessagePacket;
 import ai.sangmado.gbserver.common.channel.Connection;
+import ai.sangmado.gbserver.common.server.ConnectionHandler;
+import ai.sangmado.gbserver.jt808.server.dispatch.JT808MessageDispatcher;
 import ai.sangmado.gbserver.jt808.server.utils.Jackson;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * JT808 业务消息处理器
  */
 @Slf4j
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
-public class JT808MessageProcessor<I extends JT808MessagePacket, O extends JT808MessagePacket> extends MessageToMessageDecoder<JT808MessagePacket> {
-    private final ISpecificationContext ctx;
-    private final Map<String, Connection<I, O>> establishedConnections = new ConcurrentHashMap<>(64);
+@SuppressWarnings({"FieldCanBeLocal", "unused", "unchecked"})
+public class JT808MessageProcessor<I extends JT808MessagePacket, O extends JT808MessagePacket>
+        extends MessageToMessageDecoder<JT808MessagePacket> {
 
-    public JT808MessageProcessor(ISpecificationContext ctx) {
-        this.ctx = ctx;
-    }
+    private final ConnectionHandler<I, O> connectionHandler;
+    private final JT808MessageDispatcher<I, O> messageDispatcher;
 
-    public Map<String, Connection<I, O>> getEstablishedConnections() {
-        return establishedConnections;
-    }
-
-    public void notifyConnectionConnected(Connection<I, O> connection) {
-        log.info("设备建立连接, 连接ID[{}]", connection.getConnectionId());
-        establishedConnections.put(connection.getConnectionId(), connection);
-    }
-
-    public void notifyConnectionClosed(Connection<I, O> connection) {
-        log.info("设备关闭连接, 连接ID[{}]", connection.getConnectionId());
-        establishedConnections.remove(connection.getConnectionId());
+    public JT808MessageProcessor(ConnectionHandler<I, O> connectionHandler, JT808MessageDispatcher<I, O> messageDispatcher) {
+        this.connectionHandler = connectionHandler;
+        this.messageDispatcher = messageDispatcher;
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, JT808MessagePacket msg, List<Object> out) throws Exception {
         String connectionId = ctx.channel().id().asLongText();
-        Connection<I, O> connection = establishedConnections.get(connectionId);
+        Connection<I, O> connection = connectionHandler.getEstablishedConnection(connectionId);
 
-        String json = Jackson.toJsonPrettyString(msg);
-        log.info("从设备接收到消息, 消息ID[{}], 消息名称[{}], 协议版本[{}], 连接ID[{}]{}{}",
-                msg.getHeader().getMessageId().getName(),
-                msg.getHeader().getMessageId().getDescription(),
-                msg.getHeader().getProtocolVersion().getName(),
-                connectionId,
-                System.lineSeparator(), json);
+        // 恰巧收到消息后连接已断开, 消息丢弃
+        if (connection == null) {
+            String json = Jackson.toJsonPrettyString(msg);
+            log.warn("从设备接收到消息, 但设备已断开连接, 消息丢弃, 消息ID[{}], 消息名称[{}], 协议版本[{}], 连接ID[{}]{}{}",
+                    msg.getHeader().getMessageId().getName(),
+                    msg.getHeader().getMessageId().getDescription(),
+                    msg.getHeader().getProtocolVersion().getName(),
+                    connectionId,
+                    System.lineSeparator(), json);
+            return;
+        }
+
+        // 分发消息至业务域
+        messageDispatcher.dispatch(connection, (I) msg);
     }
 }
