@@ -26,6 +26,8 @@ public class ConnectionBasedServer<I, O> extends AbstractServer<I, O, ServerBoot
     public ConnectionBasedServer(ServerBootstrap bootstrap, int port, ConnectionHandler<I, O> connectionHandler, EventExecutorGroup eventExecutorGroup, PipelineConfigurator<I, O> pipelineConfigurator) {
         super(bootstrap, port);
         this.pipelineConfigurator = pipelineConfigurator;
+
+        // 配置通道处理器用于响应连接请求
         bootstrap.childHandler(newChannelInitializer(pipelineConfigurator, connectionHandler, eventExecutorGroup));
     }
 }

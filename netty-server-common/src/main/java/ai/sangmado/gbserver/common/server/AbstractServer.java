@@ -128,7 +128,7 @@ public abstract class AbstractServer<I, O, B extends AbstractBootstrap<B, C>, C 
             final PipelineConfigurator<I, O> pipelineConfigurator,
             final ConnectionHandler<I, O> connectionHandler,
             final EventExecutorGroup connHandlingExecutor) {
-        return new ChannelInitializer<Channel>() {
+        return new ChannelInitializer<>() {
             @Override
             protected void initChannel(Channel ch) throws Exception {
                 ServerRequiredConfigurator<I, O> serverRequiredConfigurator =
