@@ -29,6 +29,7 @@ public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapt
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        log.info("管道激活, channelId[{}]", ctx.channel().id().asLongText());
         if (ctx.channel().pipeline().get(SslHandler.class) == null) {
             Connection<I, O> connection = connectionFactory.newConnection(ctx.channel());
             super.channelActive(ctx);
@@ -40,6 +41,7 @@ public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapt
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        log.info("管道激活, channelId[{}]", ctx.channel().id().asLongText());
         super.userEventTriggered(ctx, evt);
         if (evt instanceof SslHandshakeCompletionEvent) {
             Connection<I, O> connection = connectionFactory.newConnection(ctx.channel());
@@ -49,12 +51,17 @@ public class ConnectionLifecycleHandler<I, O> extends ChannelInboundHandlerAdapt
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        log.info("管道注销, channelId[{}]", ctx.channel().id().asLongText());
         try {
             super.channelUnregistered(ctx);
         } finally {
-            Connection<I, O> closedConnection = connectionFactory.wrapClosedConnection(ctx.channel());
-            fireConnectionClosed(closedConnection);
+            // 存在对端地址
+            if (ctx.channel().remoteAddress() != null) {
+                Connection<I, O> closedConnection = connectionFactory.wrapClosedConnection(ctx.channel());
+                fireConnectionClosed(closedConnection);
+            }
         }
+        ctx.channel().deregister();
     }
 
     private void fireConnectionConnected(Connection<I, O> connection) {

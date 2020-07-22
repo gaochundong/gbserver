@@ -26,6 +26,7 @@ public class JT808ConnectionHandler<I extends JT808MessagePacket, O extends JT80
         super();
     }
 
+    @Override
     public Map<String, Connection<I, O>> getEstablishedConnections() {
         return establishedConnections;
     }

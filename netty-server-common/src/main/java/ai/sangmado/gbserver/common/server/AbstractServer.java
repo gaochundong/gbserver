@@ -8,6 +8,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.util.concurrent.EventExecutorGroup;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @param <C> Netty通道
  * @param <S> 抽象业务服务器
  */
+@Slf4j
 @SuppressWarnings({"rawtypes", "ResultOfMethodCallIgnored", "UnusedReturnValue"})
 public abstract class AbstractServer<I, O, B extends AbstractBootstrap<B, C>, C extends Channel, S extends AbstractServer> {
 

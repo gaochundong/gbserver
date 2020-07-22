@@ -5,6 +5,7 @@ import ai.sangmado.gbserver.common.channel.Connection;
 import ai.sangmado.gbserver.common.server.ConnectionHandler;
 import ai.sangmado.gbserver.jt808.server.dispatch.JT808MessageDispatcher;
 import ai.sangmado.gbserver.jt808.server.utils.Jackson;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import java.util.List;
  * JT808 业务消息处理器
  */
 @Slf4j
+@ChannelHandler.Sharable
 @SuppressWarnings({"FieldCanBeLocal", "unused", "unchecked"})
 public class JT808MessageProcessor<I extends JT808MessagePacket, O extends JT808MessagePacket>
         extends MessageToMessageDecoder<JT808MessagePacket> {

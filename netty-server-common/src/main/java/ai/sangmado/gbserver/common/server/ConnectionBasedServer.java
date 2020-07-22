@@ -11,7 +11,8 @@ import io.netty.util.concurrent.EventExecutorGroup;
  * @param <I> 读取连接通道的业务对象
  * @param <O> 写入连接通道的业务对象
  */
-public class ConnectionBasedServer<I, O> extends AbstractServer<I, O, ServerBootstrap, ServerChannel, ConnectionBasedServer<I, O>> {
+@SuppressWarnings({"UnusedReturnValue"})
+public abstract class ConnectionBasedServer<I, O> extends AbstractServer<I, O, ServerBootstrap, ServerChannel, ConnectionBasedServer<I, O>> {
 
     protected final PipelineConfigurator<I, O> pipelineConfigurator;
 
