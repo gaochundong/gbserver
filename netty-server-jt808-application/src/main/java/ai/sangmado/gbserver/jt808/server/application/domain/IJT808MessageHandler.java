@@ -1,7 +1,7 @@
-package ai.sangmado.gbserver.jt808.server.application.handler;
+package ai.sangmado.gbserver.jt808.server.application.domain;
 
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808MessageId;
-import ai.sangmado.gbserver.common.channel.Connection;
+import ai.sangmado.gbserver.jt808.server.JT808MessageHandlerContext;
 
 /**
  * JT808 消息业务处理器
@@ -18,8 +18,8 @@ public interface IJT808MessageHandler<I, O> {
     /**
      * 处理消息
      *
-     * @param connection 设备连接
-     * @param message    消息
+     * @param ctx     消息处理上下文
+     * @param message 消息
      */
-    void handle(Connection<I, O> connection, I message);
+    void handle(JT808MessageHandlerContext ctx, I message);
 }

@@ -36,6 +36,6 @@ public class PipelineConfiguratorComposite<I, O> implements PipelineConfigurator
     }
 
     public List<PipelineConfigurator> getConstituentConfigurators() {
-        return Collections.unmodifiableList(Arrays.asList(configurators));
+        return List.of(configurators);
     }
 }

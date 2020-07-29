@@ -12,18 +12,18 @@ import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808DeviceRegistrationResult
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808MessageId;
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808PlatformCommonReplyResult;
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808ProtocolVersion;
-import ai.sangmado.gbprotocol.jt808.protocol.message.JT808MessagePacket;
-import ai.sangmado.gbprotocol.jt808.protocol.message.JT808MessagePacketBuilder;
+import ai.sangmado.gbprotocol.jt808.protocol.message.JT808Message;
+import ai.sangmado.gbprotocol.jt808.protocol.message.JT808MessageAssembler;
 import ai.sangmado.gbprotocol.jt808.protocol.message.content.*;
 import ai.sangmado.gbprotocol.jt808.protocol.message.header.JT808MessageHeader;
 import ai.sangmado.gbprotocol.jt808.protocol.message.header.JT808MessageHeaderFactory;
 import ai.sangmado.gbserver.common.channel.Connection;
 import ai.sangmado.gbserver.jt808.server.*;
-import ai.sangmado.gbserver.jt808.server.application.handler.JT808MessageConsumer;
-import ai.sangmado.gbserver.jt808.server.application.handler.JT808MessageHandlerMapping;
-import ai.sangmado.gbserver.jt808.server.application.handler.jt1078.JT1078_Message_Handler_0x1206;
-import ai.sangmado.gbserver.jt808.server.application.handler.jt808.JT808_Message_Handler_0x0001;
-import ai.sangmado.gbserver.jt808.server.application.handler.jt808.JT808_Message_Handler_0x0100;
+import ai.sangmado.gbserver.jt808.server.application.domain.JT808MessageConsumer;
+import ai.sangmado.gbserver.jt808.server.application.domain.JT808MessageHandlerMapping;
+import ai.sangmado.gbserver.jt808.server.application.domain.handler.jt1078.JT1078_Message_Handler_0x1206;
+import ai.sangmado.gbserver.jt808.server.application.domain.handler.jt808.JT808_Message_Handler_0x0001;
+import ai.sangmado.gbserver.jt808.server.application.domain.handler.jt808.JT808_Message_Handler_0x0100;
 import ai.sangmado.gbserver.jt808.server.dispatch.JT808MessageDispatcher;
 import ai.sangmado.gbserver.jt808.server.utils.GlobalSerialNumberIssuer;
 import ai.sangmado.gbserver.jt808.server.utils.Jackson;
@@ -54,18 +54,18 @@ public class Application {
         JT1078MessageExtension.extend();
 
         // 注册业务域消息处理器, 此处可应用IoC容器自动发现机制或者类反射扫描机制等进行处理器映射
-        JT808MessageHandlerMapping<JT808MessagePacket, JT808MessagePacket> messageHandlerMapping = new JT808MessageHandlerMapping<>();
-        messageHandlerMapping.addHandler(new JT808_Message_Handler_0x0001<>(ctx));
-        messageHandlerMapping.addHandler(new JT808_Message_Handler_0x0100<>(ctx));
-        messageHandlerMapping.addHandler(new JT1078_Message_Handler_0x1206<>(ctx));
+        JT808MessageHandlerMapping messageHandlerMapping = new JT808MessageHandlerMapping();
+        messageHandlerMapping.addHandler(new JT808_Message_Handler_0x0001(ctx));
+        messageHandlerMapping.addHandler(new JT808_Message_Handler_0x0100(ctx));
+        messageHandlerMapping.addHandler(new JT1078_Message_Handler_0x1206(ctx));
 
-        JT808MessageConsumer<JT808MessagePacket, JT808MessagePacket> messageConsumer = new JT808MessageConsumer<>(messageHandlerMapping.getHandlers());
-        JT808MessageDispatcher<JT808MessagePacket, JT808MessagePacket> messageDispatcher = new JT808MessageDispatcher<>().bindSubscriber(messageConsumer);
-        JT808ConnectionHandler<JT808MessagePacket, JT808MessagePacket> connectionHandler = new JT808ConnectionHandler<>();
-        JT808MessageProcessor<JT808MessagePacket, JT808MessagePacket> messageProcessor = new JT808MessageProcessor<>(connectionHandler, messageDispatcher);
-        JT808ServerPipelineConfigurator<JT808MessagePacket, JT808MessagePacket> pipelineConfigurator = new JT808ServerPipelineConfigurator<>(ctx, messageProcessor);
-        JT808ServerBuilder<JT808MessagePacket, JT808MessagePacket> serverBuilder = new JT808ServerBuilder<>(port, connectionHandler, pipelineConfigurator);
-        JT808Server<JT808MessagePacket, JT808MessagePacket> server = serverBuilder.build();
+        JT808MessageConsumer messageConsumer = new JT808MessageConsumer(messageHandlerMapping.getHandlers());
+        JT808MessageDispatcher messageDispatcher = new JT808MessageDispatcher().bindSubscriber(messageConsumer);
+        JT808ConnectionHandler connectionHandler = new JT808ConnectionHandler();
+        JT808MessageProcessor messageProcessor = new JT808MessageProcessor(connectionHandler, messageDispatcher);
+        JT808ServerPipelineConfigurator pipelineConfigurator = new JT808ServerPipelineConfigurator(ctx, messageProcessor);
+        JT808ServerBuilder serverBuilder = new JT808ServerBuilder(port, connectionHandler, pipelineConfigurator);
+        JT808Server server = serverBuilder.build();
 
         server.start();
         log.info("服务器已启动");
@@ -75,11 +75,11 @@ public class Application {
             String inputString = scanner.nextLine();
             log.info("输入参数: " + inputString);
             try {
-                Optional<Connection<JT808MessagePacket, JT808MessagePacket>> establishedConnection =
+                Optional<Connection<JT808Message, JT808Message>> establishedConnection =
                         connectionHandler.getEstablishedConnections().values().stream().findFirst();
                 if (establishedConnection.isEmpty()) continue;
-                Connection<JT808MessagePacket, JT808MessagePacket> connection = establishedConnection.get();
-                JT808MessagePacket packet = null;
+                Connection<JT808Message, JT808Message> connection = establishedConnection.get();
+                JT808Message packet = null;
                 switch (inputString) {
                     case "0x8001": { // 平台通用应答
                         packet = create_JT808_Message_0x8001_packet(ctx);
@@ -120,7 +120,7 @@ public class Application {
         }
     }
 
-    private static void logPacket(Connection<JT808MessagePacket, JT808MessagePacket> connection, JT808MessagePacket packet) {
+    private static void logPacket(Connection<JT808Message, JT808Message> connection, JT808Message packet) {
         String json = Jackson.toJsonPrettyString(packet);
         log.info("向设备发送消息, 消息ID[{}], 消息名称[{}], 协议版本[{}], 连接ID[{}]{}{}",
                 packet.getMessageId().getName(),
@@ -131,7 +131,7 @@ public class Application {
     }
 
     // 平台通用应答
-    private static JT808MessagePacket create_JT808_Message_0x8001_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT808_Message_0x8001_packet(ISpecificationContext ctx) {
         JT808MessageId messageId = JT808MessageId.JT808_Message_0x8001;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -152,12 +152,12 @@ public class Application {
                 .result(result)
                 .build();
 
-        List<JT808MessagePacket> packets = JT808MessagePacketBuilder.buildPackets(ctx, header, content);
-        return packets.get(0);
+        List<JT808Message> messages = JT808MessageAssembler.assemble(ctx, header, content);
+        return messages.get(0);
     }
 
     // 平台终端注册应答
-    private static JT808MessagePacket create_JT808_Message_0x8100_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT808_Message_0x8100_packet(ISpecificationContext ctx) {
         JT808MessageId messageId = JT808MessageId.JT808_Message_0x8100;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -177,12 +177,12 @@ public class Application {
                 .ackSerialNumber(ackSerialNumber)
                 .build();
 
-        List<JT808MessagePacket> packets = JT808MessagePacketBuilder.buildPackets(ctx, header, content);
-        return packets.get(0);
+        List<JT808Message> messages = JT808MessageAssembler.assemble(ctx, header, content);
+        return messages.get(0);
     }
 
     // 平台位置信息查询
-    private static JT808MessagePacket create_JT808_Message_0x8201_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT808_Message_0x8201_packet(ISpecificationContext ctx) {
         JT808MessageId messageId = JT808MessageId.JT808_Message_0x8201;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -195,12 +195,12 @@ public class Application {
         JT808MessageContent content = JT808_Message_Content_0x8201.builder()
                 .build();
 
-        List<JT808MessagePacket> packets = JT808MessagePacketBuilder.buildPackets(ctx, header, content);
-        return packets.get(0);
+        List<JT808Message> messages = JT808MessageAssembler.assemble(ctx, header, content);
+        return messages.get(0);
     }
 
     // 平台终端链路检测指令
-    private static JT808MessagePacket create_JT808_Message_0x8204_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT808_Message_0x8204_packet(ISpecificationContext ctx) {
         JT808MessageId messageId = JT808MessageId.JT808_Message_0x8204;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -213,12 +213,12 @@ public class Application {
         JT808MessageContent content = JT808_Message_Content_0x8204.builder()
                 .build();
 
-        List<JT808MessagePacket> packets = JT808MessagePacketBuilder.buildPackets(ctx, header, content);
-        return packets.get(0);
+        List<JT808Message> messages = JT808MessageAssembler.assemble(ctx, header, content);
+        return messages.get(0);
     }
 
     // 平台下发实时音视频传输请求
-    private static JT808MessagePacket create_JT1078_Message_0x9101_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT1078_Message_0x9101_packet(ISpecificationContext ctx) {
         JT1078MessageId messageId = JT1078MessageId.JT1078_Message_0x9101;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -250,12 +250,12 @@ public class Application {
                 .channelStreamType(ChannelStreamType.Main)
                 .build();
 
-        List<JT808MessagePacket> packets = JT808MessagePacketBuilder.buildPackets(ctx, header, content);
-        return packets.get(0);
+        List<JT808Message> messages = JT808MessageAssembler.assemble(ctx, header, content);
+        return messages.get(0);
     }
 
     // 平台下发音视频实时传输控制
-    private static JT808MessagePacket create_JT1078_Message_0x9102_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT1078_Message_0x9102_packet(ISpecificationContext ctx) {
         JT1078MessageId messageId = JT1078MessageId.JT1078_Message_0x9102;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -272,12 +272,12 @@ public class Application {
                 .channelSwitchStreamKind(ChannelSwitchStreamKind.Main)
                 .build();
 
-        List<JT808MessagePacket> packets = JT808MessagePacketBuilder.buildPackets(ctx, header, content);
-        return packets.get(0);
+        List<JT808Message> messages = JT808MessageAssembler.assemble(ctx, header, content);
+        return messages.get(0);
     }
 
     // 平台下发实时音视频传输状态通知
-    private static JT808MessagePacket create_JT1078_Message_0x9105_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT1078_Message_0x9105_packet(ISpecificationContext ctx) {
         JT1078MessageId messageId = JT1078MessageId.JT1078_Message_0x9105;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -292,7 +292,7 @@ public class Application {
                 .packetLossRate(400)
                 .build();
 
-        List<JT808MessagePacket> packets = JT808MessagePacketBuilder.buildPackets(ctx, header, content);
-        return packets.get(0);
+        List<JT808Message> messages = JT808MessageAssembler.assemble(ctx, header, content);
+        return messages.get(0);
     }
 }

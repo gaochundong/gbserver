@@ -1,7 +1,7 @@
-package ai.sangmado.gbserver.jt808.server.application.handler;
+package ai.sangmado.gbserver.jt808.server.application.domain;
 
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808MessageId;
-import ai.sangmado.gbprotocol.jt808.protocol.message.JT808MessagePacket;
+import ai.sangmado.gbprotocol.jt808.protocol.message.JT808Message;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,10 +9,10 @@ import java.util.Map;
 /**
  * JT808 消息业务处理器映射
  */
-public class JT808MessageHandlerMapping<I extends JT808MessagePacket, O extends JT808MessagePacket> {
-    private final Map<JT808MessageId, IJT808MessageHandler<I, O>> handlers = new HashMap<>(300);
+public class JT808MessageHandlerMapping {
+    private final Map<JT808MessageId, IJT808MessageHandler<JT808Message, JT808Message>> handlers = new HashMap<>(300);
 
-    public void addHandler(IJT808MessageHandler<I, O> handler) {
+    public void addHandler(IJT808MessageHandler<JT808Message, JT808Message> handler) {
         handlers.put(handler.getMessageId(), handler);
     }
 
@@ -24,8 +24,8 @@ public class JT808MessageHandlerMapping<I extends JT808MessagePacket, O extends 
         return handlers.containsKey(messageId);
     }
 
-    public IJT808MessageHandler<I, O> getHandler(JT808MessageId messageId) {
-        IJT808MessageHandler<I, O> handler = handlers.get(messageId);
+    public IJT808MessageHandler<JT808Message, JT808Message> getHandler(JT808MessageId messageId) {
+        IJT808MessageHandler<JT808Message, JT808Message> handler = handlers.get(messageId);
         if (handler == null) {
             throw new UnsupportedOperationException(
                     String.format("暂不支持该消息: %s, %s, %s, %s",
@@ -35,7 +35,7 @@ public class JT808MessageHandlerMapping<I extends JT808MessagePacket, O extends 
         return handler;
     }
 
-    public Map<JT808MessageId, IJT808MessageHandler<I, O>> getHandlers() {
+    public Map<JT808MessageId, IJT808MessageHandler<JT808Message, JT808Message>> getHandlers() {
         return handlers;
     }
 }

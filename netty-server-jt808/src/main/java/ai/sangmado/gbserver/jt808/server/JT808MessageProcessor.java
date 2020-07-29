@@ -1,9 +1,9 @@
 package ai.sangmado.gbserver.jt808.server;
 
-import ai.sangmado.gbprotocol.jt808.protocol.message.JT808MessagePacket;
+import ai.sangmado.gbprotocol.jt808.protocol.message.JT808Message;
 import ai.sangmado.gbserver.common.channel.Connection;
-import ai.sangmado.gbserver.common.server.ConnectionHandler;
 import ai.sangmado.gbserver.jt808.server.dispatch.JT808MessageDispatcher;
+import ai.sangmado.gbserver.jt808.server.dispatch.JT808MessageDispatcherContext;
 import ai.sangmado.gbserver.jt808.server.utils.Jackson;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,22 +17,21 @@ import java.util.List;
  */
 @Slf4j
 @Sharable
-@SuppressWarnings({"FieldCanBeLocal", "unused", "unchecked"})
-public class JT808MessageProcessor<I extends JT808MessagePacket, O extends JT808MessagePacket>
-        extends MessageToMessageDecoder<JT808MessagePacket> {
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
+public class JT808MessageProcessor extends MessageToMessageDecoder<JT808Message> {
 
-    private final ConnectionHandler<I, O> connectionHandler;
-    private final JT808MessageDispatcher<I, O> messageDispatcher;
+    private final JT808ConnectionHandler connectionHandler;
+    private final JT808MessageDispatcher messageDispatcher;
 
-    public JT808MessageProcessor(ConnectionHandler<I, O> connectionHandler, JT808MessageDispatcher<I, O> messageDispatcher) {
+    public JT808MessageProcessor(JT808ConnectionHandler connectionHandler, JT808MessageDispatcher messageDispatcher) {
         this.connectionHandler = connectionHandler;
         this.messageDispatcher = messageDispatcher;
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, JT808MessagePacket msg, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, JT808Message msg, List<Object> out) throws Exception {
         String connectionId = ctx.channel().id().asLongText();
-        Connection<I, O> connection = connectionHandler.getEstablishedConnection(connectionId);
+        Connection<JT808Message, JT808Message> connection = connectionHandler.getEstablishedConnection(connectionId);
 
         // 恰巧收到消息后连接已断开, 消息丢弃
         if (connection == null) {
@@ -47,6 +46,6 @@ public class JT808MessageProcessor<I extends JT808MessagePacket, O extends JT808
         }
 
         // 分发消息至业务域
-        messageDispatcher.dispatch(connection, (I) msg);
+        messageDispatcher.dispatch(new JT808MessageDispatcherContext(connection), msg);
     }
 }
