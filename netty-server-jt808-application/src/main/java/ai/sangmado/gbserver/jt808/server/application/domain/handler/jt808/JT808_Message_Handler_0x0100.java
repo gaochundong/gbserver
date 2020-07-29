@@ -24,7 +24,7 @@ import java.util.List;
  * 终端注册
  */
 @Slf4j
-@SuppressWarnings({"unchecked", "SameParameterValue"})
+@SuppressWarnings({"SameParameterValue"})
 public class JT808_Message_Handler_0x0100 implements IJT808MessageHandler<JT808Message, JT808Message> {
     public static final JT808MessageId MESSAGE_ID = JT808MessageId.JT808_Message_0x0100;
 
