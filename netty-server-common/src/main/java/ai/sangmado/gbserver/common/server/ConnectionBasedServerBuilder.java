@@ -45,9 +45,9 @@ public abstract class ConnectionBasedServerBuilder<I, O, B extends ConnectionBas
 
     @Override
     protected void configureDefaultEventLoopGroup() {
-        EventLoopGroup boss = new NioEventLoopGroup();
+        EventLoopGroup acceptor = new NioEventLoopGroup();
         EventLoopGroup worker = new NioEventLoopGroup();
-        eventLoops(boss, worker);
+        eventLoops(acceptor, worker);
     }
 
     @Override

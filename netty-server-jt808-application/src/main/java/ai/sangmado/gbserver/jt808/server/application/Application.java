@@ -59,6 +59,7 @@ public class Application {
         messageHandlerMapping.addHandler(new JT808_Message_Handler_0x0100(ctx));
         messageHandlerMapping.addHandler(new JT1078_Message_Handler_0x1206(ctx));
 
+        // 构建服务器对象
         JT808MessageConsumer messageConsumer = new JT808MessageConsumer(messageHandlerMapping.getHandlers());
         JT808MessageDispatcher messageDispatcher = new JT808MessageDispatcher().bindSubscriber(messageConsumer);
         JT808ConnectionHandler connectionHandler = new JT808ConnectionHandler();
@@ -67,6 +68,7 @@ public class Application {
         JT808ServerBuilder serverBuilder = new JT808ServerBuilder(port, connectionHandler, pipelineConfigurator);
         JT808Server server = serverBuilder.build();
 
+        // 启动服务器
         server.start();
         log.info("服务器已启动");
 
