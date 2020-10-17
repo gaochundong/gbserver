@@ -7,7 +7,9 @@ import ai.sangmado.gbprotocol.jt1078.protocol.message.content.JT1078_Message_Con
 import ai.sangmado.gbprotocol.jt1078.protocol.message.content.JT1078_Message_Content_0x9105;
 import ai.sangmado.gbprotocol.jt1078.protocol.message.extension.JT1078MessageExtension;
 import ai.sangmado.gbprotocol.jt808.protocol.ISpecificationContext;
+import ai.sangmado.gbprotocol.jt808.protocol.IVersionedSpecificationContext;
 import ai.sangmado.gbprotocol.jt808.protocol.JT808ProtocolSpecificationContext;
+import ai.sangmado.gbprotocol.jt808.protocol.JT808ProtocolVersionedSpecificationContext;
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808DeviceRegistrationResult;
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808MessageId;
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808PlatformCommonReplyResult;
@@ -43,8 +45,7 @@ public class Application {
 
     public static void main(String[] args) {
         // 协议上下文仅与协议报文序列化和反序列化过程相关
-        ISpecificationContext ctx = new JT808ProtocolSpecificationContext()
-                .withProtocolVersion(JT808ProtocolVersion.V2011)
+        ISpecificationContext ctx = JT808ProtocolSpecificationContext.newInstance()
                 .withBufferPool(new PooledByteArrayFactory(512, 10));
 
         // 服务监听端口
@@ -81,34 +82,39 @@ public class Application {
                         connectionHandler.getEstablishedConnections().values().stream().findFirst();
                 if (establishedConnection.isEmpty()) continue;
                 Connection<JT808Message, JT808Message> connection = establishedConnection.get();
+                IVersionedSpecificationContext newCtx = JT808ProtocolVersionedSpecificationContext.newInstance()
+                        .withProtocolVersion(JT808ProtocolVersion.V2011)
+                        .withByteOrder(ctx.getByteOrder())
+                        .withCharset(ctx.getCharset())
+                        .withBufferPool(ctx.getBufferPool());
                 JT808Message packet = null;
                 switch (inputString) {
                     case "0x8001": { // 平台通用应答
-                        packet = create_JT808_Message_0x8001_packet(ctx);
+                        packet = create_JT808_Message_0x8001_packet(newCtx);
                         break;
                     }
                     case "0x8100": { // 平台终端注册应答
-                        packet = create_JT808_Message_0x8100_packet(ctx);
+                        packet = create_JT808_Message_0x8100_packet(newCtx);
                         break;
                     }
                     case "0x8201": { // 平台位置信息查询
-                        packet = create_JT808_Message_0x8201_packet(ctx);
+                        packet = create_JT808_Message_0x8201_packet(newCtx);
                         break;
                     }
                     case "0x8204": { // 平台终端链路检测指令
-                        packet = create_JT808_Message_0x8204_packet(ctx);
+                        packet = create_JT808_Message_0x8204_packet(newCtx);
                         break;
                     }
                     case "0x9101": { // 平台下发实时音视频传输请求 - JT1078
-                        packet = create_JT1078_Message_0x9101_packet(ctx);
+                        packet = create_JT1078_Message_0x9101_packet(newCtx);
                         break;
                     }
                     case "0x9102": { // 平台下发音视频实时传输控制 - JT1078
-                        packet = create_JT1078_Message_0x9102_packet(ctx);
+                        packet = create_JT1078_Message_0x9102_packet(newCtx);
                         break;
                     }
                     case "0x9105": { // 平台下发实时音视频传输状态通知 - JT1078
-                        packet = create_JT1078_Message_0x9105_packet(ctx);
+                        packet = create_JT1078_Message_0x9105_packet(newCtx);
                         break;
                     }
                 }
@@ -133,7 +139,7 @@ public class Application {
     }
 
     // 平台通用应答
-    private static JT808Message create_JT808_Message_0x8001_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT808_Message_0x8001_packet(IVersionedSpecificationContext ctx) {
         JT808MessageId messageId = JT808MessageId.JT808_Message_0x8001;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -159,7 +165,7 @@ public class Application {
     }
 
     // 平台终端注册应答
-    private static JT808Message create_JT808_Message_0x8100_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT808_Message_0x8100_packet(IVersionedSpecificationContext ctx) {
         JT808MessageId messageId = JT808MessageId.JT808_Message_0x8100;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -184,7 +190,7 @@ public class Application {
     }
 
     // 平台位置信息查询
-    private static JT808Message create_JT808_Message_0x8201_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT808_Message_0x8201_packet(IVersionedSpecificationContext ctx) {
         JT808MessageId messageId = JT808MessageId.JT808_Message_0x8201;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -202,7 +208,7 @@ public class Application {
     }
 
     // 平台终端链路检测指令
-    private static JT808Message create_JT808_Message_0x8204_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT808_Message_0x8204_packet(IVersionedSpecificationContext ctx) {
         JT808MessageId messageId = JT808MessageId.JT808_Message_0x8204;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -220,7 +226,7 @@ public class Application {
     }
 
     // 平台下发实时音视频传输请求
-    private static JT808Message create_JT1078_Message_0x9101_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT1078_Message_0x9101_packet(IVersionedSpecificationContext ctx) {
         JT1078MessageId messageId = JT1078MessageId.JT1078_Message_0x9101;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -257,7 +263,7 @@ public class Application {
     }
 
     // 平台下发音视频实时传输控制
-    private static JT808Message create_JT1078_Message_0x9102_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT1078_Message_0x9102_packet(IVersionedSpecificationContext ctx) {
         JT1078MessageId messageId = JT1078MessageId.JT1078_Message_0x9102;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
@@ -279,7 +285,7 @@ public class Application {
     }
 
     // 平台下发实时音视频传输状态通知
-    private static JT808Message create_JT1078_Message_0x9105_packet(ISpecificationContext ctx) {
+    private static JT808Message create_JT1078_Message_0x9105_packet(IVersionedSpecificationContext ctx) {
         JT1078MessageId messageId = JT1078MessageId.JT1078_Message_0x9105;
         String phoneNumber = "861064602988";
         int serialNumber = GlobalSerialNumberIssuer.next();
