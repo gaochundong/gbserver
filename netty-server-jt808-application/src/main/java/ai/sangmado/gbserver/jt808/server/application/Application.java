@@ -83,7 +83,7 @@ public class Application {
                 if (establishedConnection.isEmpty()) continue;
                 Connection<JT808Message, JT808Message> connection = establishedConnection.get();
                 IVersionedSpecificationContext newCtx = JT808ProtocolVersionedSpecificationContext.newInstance()
-                        .withProtocolVersion(JT808ProtocolVersion.V2011)
+                        .withProtocolVersion(JT808ProtocolVersion.V2013)
                         .withByteOrder(ctx.getByteOrder())
                         .withCharset(ctx.getCharset())
                         .withBufferPool(ctx.getBufferPool());
