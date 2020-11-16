@@ -5,6 +5,10 @@ import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808MessageId;
 import ai.sangmado.gbprotocol.jt808.protocol.enums.JT808ProtocolVersion;
 import ai.sangmado.gbprotocol.jt808.protocol.exceptions.UnsupportedJT808ProtocolVersionException;
 import ai.sangmado.gbprotocol.jt808.protocol.message.JT808Message;
+import ai.sangmado.gbprotocol.jt808.protocol.message.content.JT808MessageContent;
+import ai.sangmado.gbprotocol.jt808.protocol.message.header.JT808MessageHeader2011;
+import ai.sangmado.gbprotocol.jt808.protocol.message.header.JT808MessageHeader2013;
+import ai.sangmado.gbprotocol.jt808.protocol.message.header.JT808MessageHeader2019;
 import ai.sangmado.gbserver.jt808.server.JT808MessageHandlerContext;
 import ai.sangmado.gbserver.jt808.server.utils.Jackson;
 import lombok.extern.slf4j.Slf4j;
@@ -56,11 +60,14 @@ public abstract class AbstractJT808MessageHandler implements IJT808MessageHandle
 
         JT808ProtocolVersion protocolVersion = message.getProtocolVersion();
         if (JT808ProtocolVersion.V2011.equals(protocolVersion)) {
-            handleV2011Message(ctx, message);
+            JT808MessageHeader2011 header = (JT808MessageHeader2011) message.getHeader();
+            handleV2011Message(ctx, header, message.getContent());
         } else if (JT808ProtocolVersion.V2013.equals(protocolVersion)) {
-            handleV2013Message(ctx, message);
+            JT808MessageHeader2013 header = (JT808MessageHeader2013) message.getHeader();
+            handleV2013Message(ctx, header, message.getContent());
         } else if (JT808ProtocolVersion.V2019.equals(protocolVersion)) {
-            handleV2019Message(ctx, message);
+            JT808MessageHeader2019 header = (JT808MessageHeader2019) message.getHeader();
+            handleV2019Message(ctx, header, message.getContent());
         } else {
             throw new UnsupportedJT808ProtocolVersionException(protocolVersion);
         }
@@ -70,23 +77,26 @@ public abstract class AbstractJT808MessageHandler implements IJT808MessageHandle
      * 处理 JT808 V2011 版本消息
      *
      * @param ctx     消息处理上下文
-     * @param message 消息
+     * @param header  消息头
+     * @param content 消息体
      */
-    protected abstract void handleV2011Message(JT808MessageHandlerContext ctx, JT808Message message);
+    protected abstract void handleV2011Message(JT808MessageHandlerContext ctx, JT808MessageHeader2011 header, JT808MessageContent content);
 
     /**
      * 处理 JT808 V2013 版本消息
      *
      * @param ctx     消息处理上下文
-     * @param message 消息
+     * @param header  消息头
+     * @param content 消息体
      */
-    protected abstract void handleV2013Message(JT808MessageHandlerContext ctx, JT808Message message);
+    protected abstract void handleV2013Message(JT808MessageHandlerContext ctx, JT808MessageHeader2013 header, JT808MessageContent content);
 
     /**
      * 处理 JT808 V2019 版本消息
      *
      * @param ctx     消息处理上下文
-     * @param message 消息
+     * @param header  消息头
+     * @param content 消息体
      */
-    protected abstract void handleV2019Message(JT808MessageHandlerContext ctx, JT808Message message);
+    protected abstract void handleV2019Message(JT808MessageHandlerContext ctx, JT808MessageHeader2019 header, JT808MessageContent content);
 }

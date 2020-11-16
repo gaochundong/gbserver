@@ -36,51 +36,48 @@ public class JT808_Message_Handler_0x0100 extends AbstractJT808MessageHandler {
     }
 
     @Override
-    protected void handleV2011Message(JT808MessageHandlerContext ctx, JT808Message message) {
-        JT808MessageHeader2011 header = (JT808MessageHeader2011) message.getHeader();
-        JT808_Message_Content_0x0100 content = (JT808_Message_Content_0x0100) message.getContent();
+    protected void handleV2011Message(JT808MessageHandlerContext ctx, JT808MessageHeader2011 header, JT808MessageContent content) {
+        JT808_Message_Content_0x0100 instance = (JT808_Message_Content_0x0100) content;
         log.info("终端注册, 协议版本[{}], 设备ID[{}], 车牌号[{}]",
-                header.getProtocolVersion(), content.getDeviceId(), content.getPlateNumber());
+                header.getProtocolVersion(), instance.getDeviceId(), instance.getPlateNumber());
 
         JT808Message response = create_JT808_Message_0x8001_packet(
                 JT808ProtocolVersionedSpecificationContext.buildFrom(header.getProtocolVersion(), this.getContext()),
-                message.getHeader().getPhoneNumber(),
-                message.getMessageId(),
-                message.getHeader().getSerialNumber(),
+                header.getPhoneNumber(),
+                header.getMessageId(),
+                header.getSerialNumber(),
                 JT808PlatformCommonReplyResult.Success);
         ctx.getConnection().writeAndFlush(response);
         log.info("终端注册, 协议版本[{}], 回复成功[{}]", header.getProtocolVersion(), response.getMessageId());
     }
 
     @Override
-    protected void handleV2013Message(JT808MessageHandlerContext ctx, JT808Message message) {
-        JT808MessageHeader2013 header = (JT808MessageHeader2013) message.getHeader();
-        JT808_Message_Content_0x0100 content = (JT808_Message_Content_0x0100) message.getContent();
+    protected void handleV2013Message(JT808MessageHandlerContext ctx, JT808MessageHeader2013 header, JT808MessageContent content) {
+        JT808_Message_Content_0x0100 instance = (JT808_Message_Content_0x0100) content;
         log.info("终端注册, 协议版本[{}], 设备ID[{}], 车牌号[{}]",
-                header.getProtocolVersion(), content.getDeviceId(), content.getPlateNumber());
+                header.getProtocolVersion(), instance.getDeviceId(), instance.getPlateNumber());
 
         JT808Message response = create_JT808_Message_0x8001_packet(
                 JT808ProtocolVersionedSpecificationContext.buildFrom(header.getProtocolVersion(), this.getContext()),
-                message.getHeader().getPhoneNumber(),
-                message.getMessageId(),
-                message.getHeader().getSerialNumber(),
+                header.getPhoneNumber(),
+                header.getMessageId(),
+                header.getSerialNumber(),
                 JT808PlatformCommonReplyResult.Success);
         ctx.getConnection().writeAndFlush(response);
         log.info("终端注册, 协议版本[{}], 回复成功[{}]", header.getProtocolVersion(), response.getMessageId());
     }
 
     @Override
-    protected void handleV2019Message(JT808MessageHandlerContext ctx, JT808Message message) {
-        JT808MessageHeader2019 header = (JT808MessageHeader2019) message.getHeader();
-        JT808_Message_Content_0x0100 content = (JT808_Message_Content_0x0100) message.getContent();
+    protected void handleV2019Message(JT808MessageHandlerContext ctx, JT808MessageHeader2019 header, JT808MessageContent content) {
+        JT808_Message_Content_0x0100 instance = (JT808_Message_Content_0x0100) content;
         log.info("终端注册, 协议版本[{}], 版本号[{}], 设备ID[{}], 车牌号[{}]",
-                header.getProtocolVersion(), header.getVersionNumber(), content.getDeviceId(), content.getPlateNumber());
+                header.getProtocolVersion(), header.getVersionNumber(), instance.getDeviceId(), instance.getPlateNumber());
 
         JT808Message response = create_JT808_Message_0x8001_packet(
                 JT808ProtocolVersionedSpecificationContext.buildFrom(header.getProtocolVersion(), this.getContext()),
-                message.getHeader().getPhoneNumber(),
-                message.getMessageId(),
-                message.getHeader().getSerialNumber(),
+                header.getPhoneNumber(),
+                header.getMessageId(),
+                header.getSerialNumber(),
                 JT808PlatformCommonReplyResult.Success);
         ctx.getConnection().writeAndFlush(response);
         log.info("终端注册, 协议版本[{}], 回复成功[{}]", header.getProtocolVersion(), response.getMessageId());

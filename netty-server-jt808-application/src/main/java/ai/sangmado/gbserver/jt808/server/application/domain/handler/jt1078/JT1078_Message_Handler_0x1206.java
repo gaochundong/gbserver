@@ -37,45 +37,42 @@ public class JT1078_Message_Handler_0x1206 extends AbstractJT808MessageHandler {
     }
 
     @Override
-    protected void handleV2011Message(JT808MessageHandlerContext ctx, JT808Message message) {
-        JT808MessageHeader2011 header = (JT808MessageHeader2011) message.getHeader();
-        JT1078_Message_Content_0x1206 content = (JT1078_Message_Content_0x1206) message.getContent();
+    protected void handleV2011Message(JT808MessageHandlerContext ctx, JT808MessageHeader2011 header, JT808MessageContent content) {
+        JT1078_Message_Content_0x1206 instance = (JT1078_Message_Content_0x1206) content;
         JT808Message response = create_JT808_Message_0x8001_packet(
                 JT808ProtocolVersionedSpecificationContext.buildFrom(header.getProtocolVersion(), this.getContext()),
-                message.getHeader().getPhoneNumber(),
-                message.getMessageId(),
-                message.getHeader().getSerialNumber(),
+                header.getPhoneNumber(),
+                header.getMessageId(),
+                header.getSerialNumber(),
                 JT808PlatformCommonReplyResult.Success);
         ctx.getConnection().writeAndFlush(response);
-        log.info("终端文件上传完成通知, 协议版本[{}], 回复成功[{}]", message.getProtocolVersion(), response.getMessageId());
+        log.info("终端文件上传完成通知, 协议版本[{}], 回复成功[{}]", header.getProtocolVersion(), response.getMessageId());
     }
 
     @Override
-    protected void handleV2013Message(JT808MessageHandlerContext ctx, JT808Message message) {
-        JT808MessageHeader2013 header = (JT808MessageHeader2013) message.getHeader();
-        JT1078_Message_Content_0x1206 content = (JT1078_Message_Content_0x1206) message.getContent();
+    protected void handleV2013Message(JT808MessageHandlerContext ctx, JT808MessageHeader2013 header, JT808MessageContent content) {
+        JT1078_Message_Content_0x1206 instance = (JT1078_Message_Content_0x1206) content;
         JT808Message response = create_JT808_Message_0x8001_packet(
                 JT808ProtocolVersionedSpecificationContext.buildFrom(header.getProtocolVersion(), this.getContext()),
-                message.getHeader().getPhoneNumber(),
-                message.getMessageId(),
-                message.getHeader().getSerialNumber(),
+                header.getPhoneNumber(),
+                header.getMessageId(),
+                header.getSerialNumber(),
                 JT808PlatformCommonReplyResult.Success);
         ctx.getConnection().writeAndFlush(response);
-        log.info("终端文件上传完成通知, 协议版本[{}], 回复成功[{}]", message.getProtocolVersion(), response.getMessageId());
+        log.info("终端文件上传完成通知, 协议版本[{}], 回复成功[{}]", header.getProtocolVersion(), response.getMessageId());
     }
 
     @Override
-    protected void handleV2019Message(JT808MessageHandlerContext ctx, JT808Message message) {
-        JT808MessageHeader2019 header = (JT808MessageHeader2019) message.getHeader();
-        JT1078_Message_Content_0x1206 content = (JT1078_Message_Content_0x1206) message.getContent();
+    protected void handleV2019Message(JT808MessageHandlerContext ctx, JT808MessageHeader2019 header, JT808MessageContent content) {
+        JT1078_Message_Content_0x1206 instance = (JT1078_Message_Content_0x1206) content;
         JT808Message response = create_JT808_Message_0x8001_packet(
                 JT808ProtocolVersionedSpecificationContext.buildFrom(header.getProtocolVersion(), this.getContext()),
-                message.getHeader().getPhoneNumber(),
-                message.getMessageId(),
-                message.getHeader().getSerialNumber(),
+                header.getPhoneNumber(),
+                header.getMessageId(),
+                header.getSerialNumber(),
                 JT808PlatformCommonReplyResult.Success);
         ctx.getConnection().writeAndFlush(response);
-        log.info("终端文件上传完成通知, 协议版本[{}], 回复成功[{}]", message.getProtocolVersion(), response.getMessageId());
+        log.info("终端文件上传完成通知, 协议版本[{}], 回复成功[{}]", header.getProtocolVersion(), response.getMessageId());
     }
 
     // 平台通用应答
